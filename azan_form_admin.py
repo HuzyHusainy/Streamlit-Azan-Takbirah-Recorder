@@ -4,11 +4,90 @@ import os
 import re
 from datetime import datetime
 from audio_recorder_streamlit import audio_recorder
+import base64
 
-# ---------------- CONFIG ----------------
+#---------------- CONFIG ----------------
+def set_background(image_path):
+    with open(image_path, "rb") as img:
+        encoded = base64.b64encode(img.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: repeat;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+set_background("assets/ramadan-bg.jpg")
+st.markdown(
+    """
+    <style>
+    .block-container {
+        background-color: rgba(255, 255, 255, 0.92);
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 900px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <style>
+    /* Input labels */
+    label {
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* Section headers */
+    .stMarkdown h1 {
+        font-size: 2.1rem;
+    }
+
+    .stMarkdown h2 {
+        font-size: 1.6rem;
+    }
+
+    .stMarkdown h3 {
+        font-size: 1.25rem;
+    }
+
+    /* Checkbox / radio text */
+    .stCheckbox label, .stRadio label {
+        font-size: 1rem !important;
+    }
+
+    /* Help text under inputs */
+    .stCaption {
+        font-size: 0.9rem;
+        color: #555;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 st.set_page_config(page_title="Shehrullah Aurangabad", layout="centered")
 
+if "review" not in st.session_state:
+    st.session_state.review = False
+
+if "submitted" not in st.session_state:
+    st.session_state.submitted = False
+ 
 ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+
 DATA_FILE = "submissions.csv"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -41,6 +120,7 @@ for key in ["review", "admin_ok", "azan_audio", "takbirah_audio"]:
 
 # ---------------- ADMIN LOGIN ----------------
 with st.sidebar:
+    st.image("assets/umoor.png", width=180)
     st.subheader("🔐 Admin Login")
     if not st.session_state.admin_ok:
         pwd = st.text_input("Password", type="password")
@@ -74,7 +154,6 @@ if st.session_state.admin_ok:
         st.write("Name:", row["name"])
         st.write("Masjid:", row["masjid"])
         st.write("Interest:", row["interests"])
-        st.write("Waqt:", row["waqt"])
         st.write("Remarks:", row["remarks"])
 
         for label, col in [("Azan", "azan_file"), ("Takbirah", "takbirah_file")]:
@@ -86,6 +165,29 @@ if st.session_state.admin_ok:
 
 st.divider()
 st.title("🕌 Azan & Takbirah Registration")
+# ---------------- THANK YOU SCREEN ----------------
+if st.session_state.submitted:
+    st.success("🎉 Thank you! Your response has been recorded.")
+
+    st.markdown(
+        """
+        **Jazakallah Khair** for your interest in Azan & Takbirah.
+        """
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("📝 Submit another response"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+
+    with col2:
+        st.markdown("🙏 Shukran Jazeelan.")
+
+    st.stop()
+
 
 existing_its = load_existing_its()
 
@@ -94,7 +196,7 @@ name = st.text_input("Aapnu Full Name *")
 its = st.text_input("ITS Number *")
 whatsapp = st.text_input("WhatsApp Number *", placeholder="9876543210")
 
-masjid = st.selectbox("Shehrullah 1447 ma Kai Masjid ma Namaz ada karso? *", ["", "Najmi Masjid", "Saifee Masjid", "Kalimi Masjid", "Vajihi Masjid", "Jamali Park"])
+masjid = st.selectbox("Shehrullah 1447 ma Kai Masjid ma Namaz ada karso? *", ["", "Najmi Masjid", "Saifee Masjid", "Kalimi Masjid", "Vajihi Masjid"])
 
 interest_azan = st.checkbox("Azan")
 interest_takbirah = st.checkbox("Takbirah")
@@ -111,7 +213,6 @@ if interest_takbirah:
     if st.session_state.takbirah_audio:
         st.audio(st.session_state.takbirah_audio)
 
-waqt = st.multiselect("Aapne kaya Waqt ma Azan/Takbirah aapvu che?", ["Fajr", "Zuhr", "Maghrib"])
 remarks = st.text_area("Remarks / Requests")
 
 # ---------------- VALIDATION ----------------
@@ -140,8 +241,6 @@ if interest_azan and not st.session_state.azan_audio:
 if interest_takbirah and not st.session_state.takbirah_audio:
     errors.append("Takbirah recording required")
 
-if not waqt:
-    errors.append("Select at least one waqt")
 
 # ---------------- REVIEW STEP ----------------
 if not st.session_state.review:
@@ -159,7 +258,6 @@ if st.session_state.review:
     st.write("ITS:", its)
     st.write("WhatsApp:", whatsapp)
     st.write("Masjid:", masjid)
-    st.write("Waqt:", ", ".join(waqt))
     st.write("Remarks:", remarks or "—")
 
     if interest_azan:
@@ -183,7 +281,6 @@ if st.session_state.review:
                 "interests": ", ".join(
                     i for i, v in {"Azan": interest_azan, "Takbirah": interest_takbirah}.items() if v
                 ),
-                "waqt": ", ".join(waqt),
                 "azan_file": save_audio(st.session_state.azan_audio, "azan", its),
                 "takbirah_file": save_audio(st.session_state.takbirah_audio, "takbirah", its),
                 "remarks": remarks,
@@ -197,5 +294,6 @@ if st.session_state.review:
                 index=False
             )
 
-            st.success("Submission successful 🌙")
-            st.stop()
+            st.session_state.submitted = True
+            st.session_state.review = False
+            st.rerun()
