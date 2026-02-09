@@ -59,6 +59,10 @@ if st.session_state.admin_ok:
         df = pd.read_csv(DATA_FILE)
         st.sidebar.write(f"Total Submissions: **{len(df)}**")
 
+        masjid = st.selectbox("Filter by Masjid", ["All"] + sorted(df["masjid"].unique()))
+        if masjid != "All":
+            df = df[df["masjid"] == masjid]
+
         selected_its = st.sidebar.selectbox(
             "Review Submission (ITS)",
             df["its"].astype(str).tolist()
@@ -86,28 +90,28 @@ st.title("🕌 Azan & Takbirah Registration")
 existing_its = load_existing_its()
 
 # ---------------- FORM ----------------
-name = st.text_input("Full Name")
-its = st.text_input("ITS Number")
-whatsapp = st.text_input("WhatsApp Number", placeholder="9876543210")
+name = st.text_input("Aapnu Full Name *")
+its = st.text_input("ITS Number *")
+whatsapp = st.text_input("WhatsApp Number *", placeholder="9876543210")
 
-masjid = st.selectbox("Masjid", ["", "Masjid A", "Masjid B", "Masjid C"])
+masjid = st.selectbox("Shehrullah 1447 ma Kai Masjid ma Namaz ada karso? *", ["", "Najmi Masjid", "Saifee Masjid", "Kalimi Masjid", "Vajihi Masjid", "Jamali Park"])
 
 interest_azan = st.checkbox("Azan")
 interest_takbirah = st.checkbox("Takbirah")
 
 if interest_azan:
     st.markdown("🎙 **Azan Recording**")
-    st.session_state.azan_audio = audio_recorder("Start / Stop Recording", key="azan")
+    st.session_state.azan_audio = audio_recorder("Start / Stop Recording Azan", key="azan")
     if st.session_state.azan_audio:
         st.audio(st.session_state.azan_audio)
 
 if interest_takbirah:
     st.markdown("🎙 **Takbirah Recording**")
-    st.session_state.takbirah_audio = audio_recorder("Start / Stop Recording", key="takbirah")
+    st.session_state.takbirah_audio = audio_recorder("Start / Stop Recording Takbirah", key="takbirah")
     if st.session_state.takbirah_audio:
         st.audio(st.session_state.takbirah_audio)
 
-waqt = st.multiselect("Preferred Waqt", ["Fajr", "Zuhr", "Asr", "Maghrib", "Isha"])
+waqt = st.multiselect("Aapne kaya Waqt ma Azan/Takbirah aapvu che?", ["Fajr", "Zuhr", "Maghrib"])
 remarks = st.text_area("Remarks / Requests")
 
 # ---------------- VALIDATION ----------------
