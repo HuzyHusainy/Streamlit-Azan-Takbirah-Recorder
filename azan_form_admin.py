@@ -8,7 +8,7 @@ from audio_recorder_streamlit import audio_recorder
 # ---------------- CONFIG ----------------
 st.set_page_config(page_title="Shehrullah Aurangabad", layout="centered")
 
-ADMIN_PASSWORD = "azanadmin"
+ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 DATA_FILE = "submissions.csv"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
