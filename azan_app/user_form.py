@@ -7,39 +7,6 @@ from config import *
 from utils import *
 from datetime import datetime
 
-def show_recording_section(audio_type, title, recorder_key):
-    """Display recording section with status messages"""
-    st.markdown(f"**🎙️ {title}**")
-    
-    # Check if we have existing audio
-    existing_audio = get_audio(audio_type)
-    
-    # Determine button text
-    if existing_audio:
-        button_text = "🔄 Record Again"
-    else:
-        button_text = "🎙️ Tap to Record"
-    
-    recorded_audio = audio_recorder(
-        button_text,
-        key=recorder_key,
-        pause_threshold=AUDIO_PAUSE_THRESHOLD,
-        sample_rate=AUDIO_SAMPLE_RATE
-    )
-    
-    # Save audio if recorded
-    if recorded_audio is not None:
-        set_audio(audio_type, recorded_audio)
-    
-    # Display saved audio
-    audio_data = get_audio(audio_type)
-    if audio_data:
-        st.audio(audio_data, format="audio/wav")
-        show_inline_success(f"{audio_type}_audio", f"{title} recorded successfully")
-    
-    return audio_data
-
-
 def show_form():
     """Display main user registration form"""
     st.subheader("📝 Your Information")
@@ -136,15 +103,66 @@ def show_form():
     if not (interest_azan or interest_takbirah) and st.session_state.validation_errors.get('interests'):
         show_inline_error("interests", st.session_state.validation_errors['interests'])
 
-    # RECORDINGS - Get audio data from session state
-    azan_audio = get_audio("azan") if interest_azan else None
-    takbirah_audio = get_audio("takbirah") if interest_takbirah else None
+    # RECORDINGS - Use columns to maintain consistent rendering order
+    azan_audio = None
+    takbirah_audio = None
 
-    if interest_azan:
-        azan_audio = show_recording_section("azan", "Azan Recording", "azan_recorder")
-
-    if interest_takbirah:
-        takbirah_audio = show_recording_section("takbirah", "Takbirah Recording", "takbirah_recorder")
+    # Always reserve space for both, render only if checked
+    if interest_azan or interest_takbirah:
+        # Create columns for layout consistency
+        if interest_azan:
+            st.markdown("**🎙️ Azan Recording**")
+            
+            # Check if we have existing audio
+            existing_audio = get_audio("azan")
+            button_text = "🔄 Record Again" if existing_audio else "🎙️ Tap to Record"
+            
+            recorded_audio = audio_recorder(
+                button_text,
+                key="azan_recorder",
+                pause_threshold=AUDIO_PAUSE_THRESHOLD,
+                sample_rate=AUDIO_SAMPLE_RATE
+            )
+            
+            # Save audio if recorded
+            if recorded_audio is not None:
+                set_audio("azan", recorded_audio)
+            
+            # Display saved audio
+            azan_audio = get_audio("azan")
+            if azan_audio:
+                st.audio(azan_audio, format="audio/wav")
+                show_inline_success("azan_audio", "Azan recorded successfully")
+        
+        if interest_takbirah:
+            st.markdown("**🎙️ Takbirah Recording**")
+            
+            # Check if we have existing audio
+            existing_audio = get_audio("takbirah")
+            button_text = "🔄 Record Again" if existing_audio else "🎙️ Tap to Record"
+            
+            recorded_audio = audio_recorder(
+                button_text,
+                key="takbirah_recorder",
+                pause_threshold=AUDIO_PAUSE_THRESHOLD,
+                sample_rate=AUDIO_SAMPLE_RATE
+            )
+            
+            # Save audio if recorded
+            if recorded_audio is not None:
+                set_audio("takbirah", recorded_audio)
+            
+            # Display saved audio
+            takbirah_audio = get_audio("takbirah")
+            if takbirah_audio:
+                st.audio(takbirah_audio, format="audio/wav")
+                show_inline_success("takbirah_audio", "Takbirah recorded successfully")
+    
+    # Get audio for validation (even if not currently displayed)
+    if not interest_azan:
+        azan_audio = get_audio("azan")
+    if not interest_takbirah:
+        takbirah_audio = get_audio("takbirah")
 
     # REMARKS
     st.subheader("📝 Additional Information")

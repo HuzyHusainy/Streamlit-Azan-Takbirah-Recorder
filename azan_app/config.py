@@ -2,8 +2,8 @@
 import streamlit as st
 
 # Admin
-# ADMIN_PASSWORD = "azan"
-ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+ADMIN_PASSWORD = "azan"
+# ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 # Files & Directories
 DATA_FILE = "submissions.csv"
@@ -11,7 +11,7 @@ UPLOAD_DIR = "uploads"
 REVIEW_FILE = "admin_reviews.csv"
 
 # Audio Settings
-AUDIO_PAUSE_THRESHOLD = 2.0  # seconds
+AUDIO_PAUSE_THRESHOLD = 5.0  # seconds
 AUDIO_SAMPLE_RATE = 16000
 
 # Validation Rules
