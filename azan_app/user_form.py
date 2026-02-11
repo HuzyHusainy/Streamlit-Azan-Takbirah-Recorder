@@ -13,7 +13,7 @@ def show_form():
 
     # NAME FIELD
     name = st.text_input(
-        "Full Name *",
+        "Aapnu Full Name *",
         placeholder="Enter your full name",
         key="input_name"
     )
@@ -84,7 +84,7 @@ def show_form():
 
     # MASJID FIELD
     masjid = st.selectbox(
-        "Which Masjid do you pray at during Shehrullah 1447? *",
+        "Shehrullah 1447 ma Kai Masjid ma Namaz ada karso? *",
         MASJID_LIST,
         key="select_masjid"
     )
