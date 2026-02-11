@@ -215,9 +215,12 @@ def show_admin_panel_github():
                     "Pending": pending_m
                 })
             
-            stats_df = pd.DataFrame(masjid_stats)
-            stats_df = stats_df.set_index("Masjid")
-            st.bar_chart(stats_df)
+            if masjid_stats:
+                stats_df = pd.DataFrame(masjid_stats)
+                stats_df = stats_df.set_index("Masjid")
+                
+                # Use Streamlit bar chart
+                st.bar_chart(stats_df, color=('green','yellow'),horizontal=True)
         
         st.divider()
         
