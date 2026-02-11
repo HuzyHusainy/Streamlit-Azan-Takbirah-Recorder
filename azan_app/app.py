@@ -7,6 +7,7 @@ import streamlit as st
 from config import *
 from utils import *
 from admin_panel import show_admin_login, show_admin_panel
+from github_admin import show_admin_panel_github
 from user_form import show_form, show_review_screen, show_thank_you_screen
 
 # ============= PAGE CONFIG =============
@@ -53,7 +54,7 @@ show_admin_login()
 # Admin Panel (if logged in)
 if st.session_state.admin_ok:
     st.sidebar.divider()
-    show_admin_panel()
+    show_admin_panel_github()
 
 st.divider()
 st.title("🕌 Azan & Takbirah Registration")

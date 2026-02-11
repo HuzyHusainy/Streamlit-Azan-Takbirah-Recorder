@@ -13,7 +13,7 @@ def show_form():
 
     # NAME FIELD
     name = st.text_input(
-        "Aapnu Full Name *",
+        "Full Name *",
         placeholder="Enter your full name",
         key="input_name"
     )
@@ -84,7 +84,7 @@ def show_form():
 
     # MASJID FIELD
     masjid = st.selectbox(
-        "Shehrullah 1447 ma Kai Masjid ma Namaz ada karso? *",
+        "Which Masjid do you pray at during Shehrullah 1447? *",
         MASJID_LIST,
         key="select_masjid"
     )
@@ -171,6 +171,12 @@ def show_form():
         placeholder="Any additional information you'd like to share",
         key="textarea_remarks"
     )
+
+    # Always ensure audio variables are defined (get from session state if not set)
+    if azan_audio is None:
+        azan_audio = get_audio("azan")
+    if takbirah_audio is None:
+        takbirah_audio = get_audio("takbirah")
 
     # VALIDATION
     errors = {}
@@ -278,32 +284,53 @@ def show_review_screen(form_data):
             if not st.session_state.submit_clicked:
                 st.session_state.submit_clicked = True
                 
-                interest_azan, interest_takbirah = form_data['interests']
-                row = {
-                    "name": form_data['name'],
-                    "its": form_data['its'],
-                    "whatsapp": form_data['whatsapp'],
-                    "masjid": form_data['masjid'],
-                    "interests": ", ".join(
-                        i for i, v in {
-                            "Azan": interest_azan,
-                            "Takbirah": interest_takbirah
-                        }.items() if v
-                    ),
-                    "azan_file": save_audio(form_data['azan_audio'], "azan", form_data['its']) if interest_azan else "",
-                    "takbirah_file": save_audio(form_data['takbirah_audio'], "takbirah", form_data['its']) if interest_takbirah else "",
-                    "remarks": form_data['remarks'] if form_data['remarks'] else "No comments",  # ← Fix for NaN
-                    "submitted_at": datetime.now().isoformat()
-                }
+                with st.spinner("Uploading to cloud..."):
+                    interest_azan, interest_takbirah = form_data['interests']
+                    
+                    # Upload audio files to GitHub
+                    azan_file_id = None
+                    takbirah_file_id = None
+                    
+                    if interest_azan and form_data['azan_audio']:
+                        azan_file_id = upload_audio_to_github(
+                            form_data['azan_audio'], 
+                            form_data['its'], 
+                            "azan"
+                        )
+                    
+                    if interest_takbirah and form_data['takbirah_audio']:
+                        takbirah_file_id = upload_audio_to_github(
+                            form_data['takbirah_audio'],
+                            form_data['its'],
+                            "takbirah"
+                        )
+                    
+                    # Prepare form data
+                    row = {
+                        "name": form_data['name'],
+                        "its": form_data['its'],
+                        "whatsapp": form_data['whatsapp'],
+                        "masjid": form_data['masjid'],
+                        "interests": ", ".join(
+                            i for i, v in {
+                                "Azan": interest_azan,
+                                "Takbirah": interest_takbirah
+                            }.items() if v
+                        ),
+                        "azan_file": azan_file_id or "",
+                        "takbirah_file": takbirah_file_id or "",
+                        "remarks": form_data['remarks'] if form_data['remarks'] else "No comments",
+                        "submitted_at": datetime.now().isoformat()
+                    }
 
-                if save_submission(row):
-                    st.session_state.submitted = True
-                    st.session_state.review = False
-                    st.session_state.submit_clicked = False
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.session_state.submit_clicked = False
+                    if save_submission(row):
+                        st.session_state.submitted = True
+                        st.session_state.review = False
+                        st.session_state.submit_clicked = False
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.session_state.submit_clicked = False
 
 
 def show_thank_you_screen():

@@ -163,16 +163,94 @@ def load_existing_review(its):
 
 # ============= SUBMISSION FUNCTIONS =============
 
-def save_submission(row):
-    """Save form submission to CSV"""
+def upload_audio_to_github(audio_bytes, its_number, audio_type):
+    """Upload audio file to GitHub"""
     try:
-        pd.DataFrame([row]).to_csv(
-            DATA_FILE,
-            mode="a",
-            header=not os.path.exists(DATA_FILE),
-            index=False
-        )
-        return True
+        import requests
+        import base64
+        
+        token = st.secrets["github"]["token"]
+        repo = st.secrets["github"]["repo"]
+        
+        # Create audio folder path
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{audio_type}_{its_number}_{timestamp}.wav"
+        path = f"audio/{audio_type}/{filename}"
+        
+        # GitHub API URL for file upload
+        url = f"https://api.github.com/repos/{repo}/contents/{path}"
+        headers = {"Authorization": f"token {token}"}
+        
+        # Encode audio as base64
+        encoded_audio = base64.b64encode(audio_bytes).decode()
+        
+        data = {
+            "message": f"Add {audio_type} audio from {its_number}",
+            "content": encoded_audio,
+            "branch": "main"
+        }
+        
+        response = requests.put(url, json=data, headers=headers)
+        
+        if response.status_code in [201, 200]:
+            # Return the file path as ID for reference in CSV
+            return path
+        else:
+            st.error(f"❌ Failed to upload {audio_type} audio")
+            return None
+    
+    except Exception as e:
+        st.error(f"❌ Audio upload failed: {e}")
+        return None
+
+
+def save_submission(row):
+    """Save form submission to GitHub"""
+    try:
+        import requests
+        import base64
+        import io
+        
+        token = st.secrets["github"]["token"]
+        repo = st.secrets["github"]["repo"]
+        url = f"https://api.github.com/repos/{repo}/contents/submissions.csv"
+        headers = {"Authorization": f"token {token}"}
+        
+        # Get existing CSV from GitHub
+        resp = requests.get(url, headers=headers)
+        
+        if resp.status_code == 200:
+            # File exists - update it
+            sha = resp.json()['sha']
+            csv_content = base64.b64decode(resp.json()['content']).decode()
+            df = pd.read_csv(io.StringIO(csv_content))
+        else:
+            # File doesn't exist - create new
+            sha = None
+            df = pd.DataFrame()
+        
+        # Add new row
+        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+        
+        # Convert to CSV
+        csv_string = df.to_csv(index=False)
+        encoded = base64.b64encode(csv_string.encode()).decode()
+        
+        # Prepare GitHub API request
+        data = {
+            "message": f"Add submission from {row['its']} - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            "content": encoded,
+            "branch": "main"
+        }
+        
+        if sha:
+            data["sha"] = sha
+        
+        # Push to GitHub
+        response = requests.put(url, json=data, headers=headers)
+        
+        return response.status_code in [201, 200]
+    
     except Exception as e:
         st.error(f"Failed to save submission: {e}")
         return False
