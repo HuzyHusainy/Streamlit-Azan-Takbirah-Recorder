@@ -202,7 +202,7 @@ def show_admin_panel_github():
             st.write("**Assessment Status by Masjid**")
             
             masjid_stats = []
-            for m in display_df:
+            for m in display_df["masjid"].dropna().unique().tolist():
                 masjid_df = df[df["masjid"] == m]
                 if reviews_df is not None and not reviews_df.empty:
                     reviewed_its = reviews_df[reviews_df["its"].isin(masjid_df["its"].astype(str))]["its"].unique()
@@ -221,7 +221,8 @@ def show_admin_panel_github():
             stats_df = stats_df.set_index("Masjid")
             
             # Create interactive chart with hover info
-            st.bar_chart(stats_df, use_container_width=True)
+            st.bar_chart(stats_df, color=('green','yellow'), 
+                         horizontal=True, use_container_width=True)
             
             # Show detailed breakdown below chart
             with st.expander("📊 Detailed Breakdown"):
@@ -253,7 +254,8 @@ def show_admin_panel_github():
                 "Pending": pending_m
             }])
             stats_df = stats_df.set_index("Masjid")
-            st.bar_chart(stats_df, use_container_width=True)
+            st.bar_chart(stats_df, color=('green','yellow'), 
+                         horizontal=True, use_container_width=True)
             
             # Show summary below chart
             col1, col2, col3 = st.columns(3)
