@@ -52,11 +52,15 @@ CSS_STYLES = """
 label {
     font-size: 1.05rem !important;
     font-weight: 600 !important;
-    color: #333 !important;
+    color: #1a1a1a !important;
     display: block !important;
 }
 
-.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3 {
+ {
     color: #1a1a1a;
 }
 
@@ -65,19 +69,80 @@ label {
     color: #555;
 }
 
-/* ========== DARK MODE ========== */
+.stMarkdown,
+[data-testid="stMarkdownContainer"] {
+    color: #1a1a1a;
+}
+
+/* ========== INPUT & FORM FIELDS ========== */
+input, textarea, select {
+    color: #1a1a1a !important;
+    background-color: #ffffff !important;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #999 !important;
+}
+
+/* ========== DARK MODE - CRITICAL FIX ========== */
+[data-theme="dark"] {
+    background-color: #0e1117 !important;
+}
+
+/* Dark container */
+[data-theme="dark"] .block-container {
+    background-color: rgba(22, 27, 34, 0.95) !important;
+}
+
 [data-theme="dark"] label {
-    color: #e0e0e0 !important;
+    color: #f0f6fc !important;
+    font-weight: 700 !important;
 }
 
 [data-theme="dark"] .stMarkdown h1,
 [data-theme="dark"] .stMarkdown h2,
-[data-theme="dark"] .stMarkdown h3 {
-    color: #e0e0e0;
+[data-theme="dark"] .stMarkdown h3,
+[data-theme="dark"] [data-testid="stMarkdownContainer"] h1,
+[data-theme="dark"] [data-testid="stMarkdownContainer"] h2,
+[data-theme="dark"] [data-testid="stMarkdownContainer"] h3 {
+    color: #f0f6fc !important;
+    font-weight: 700 !important;
 }
 
-[data-theme="dark"] .stCaption {
-    color: #b0b0b0;
+/* Main markdown body */
+[data-theme="dark"] .stMarkdown,
+[data-theme="dark"] [data-testid="stMarkdownContainer"] {
+    color: #e6edf3 !important;
+}
+
+/* Caption */
+[data-theme="dark"] .stCaption,
+[data-theme="dark"] [data-testid="stCaption"] {
+    color: #8b949e !important;
+}
+
+/* ---- Checkbox ---- */
+[data-theme="dark"] .stCheckbox label,
+[data-theme="dark"] [data-testid="stCheckbox"] label {
+    color: #f0f6fc !important;
+}
+
+[data-theme="dark"] .stCheckbox div[role="checkbox"] {
+    border-color: #58a6ff !important;
+}
+
+/* Dark mode input fields - ensure visibility */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    color: #f0f6fc !important;
+    background-color: #161b22 !important;
+    border: 2px solid #30363d !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: #8b949e !important;
 }
 
 /* ========== VALIDATION STYLES ========== */
@@ -93,6 +158,14 @@ label {
     font-weight: 500;
     margin-top: 0.25rem;
     font-size: 0.85rem;
+}
+
+[data-theme="dark"] .validation-error {
+    color: #ff6b6b !important;
+}
+
+[data-theme="dark"] .validation-success {
+    color: #51cf66 !important;
 }
 
 /* ========== REVIEW BADGE STYLES ========== */
@@ -120,9 +193,24 @@ label {
     color: #b71c1c;
 }
 
+[data-theme="dark"] .review-badge-approved {
+    background-color: #1d3a1d;
+    color: #51cf66;
+}
+
+[data-theme="dark"] .review-badge-improvement {
+    background-color: #3a3a1d;
+    color: #ffd43b;
+}
+
+[data-theme="dark"] .review-badge-not-okay {
+    background-color: #3a1d1d;
+    color: #ff6b6b;
+}
+
 /* ========== LOADING SPINNER ========== */
 .stSpinner {
-    color: #4CAF50 !important;
+    color: #58a6ff !important;
 }
 
 /* ========== MOBILE RESPONSIVE (max-width: 640px) ========== */
@@ -133,6 +221,10 @@ label {
         font-weight: 700 !important;
         line-height: 1.6 !important;
         margin-bottom: 0.5rem !important;
+    }
+    
+    [data-theme="dark"] label {
+        color: #f0f6fc !important;
     }
     
     /* Larger section headers */
@@ -218,3 +310,5 @@ label {
 
 </style>
 """
+
+
