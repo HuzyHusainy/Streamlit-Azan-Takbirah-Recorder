@@ -175,7 +175,10 @@ def show_admin_panel_github():
         display_df = df if masjid == "All" else df[df["masjid"] == masjid]
         
         # Show assessment statistics
-        st.subheader("📊 Assessment Summary")
+        if masjid == "All":
+            st.subheader("📊 Assessment Summary")
+        else:
+            st.subheader(f"📊 Assessment Summary - {masjid}")
         
         assessed = 0
         if reviews_df is not None and not reviews_df.empty and 'its' in reviews_df.columns:
@@ -194,13 +197,12 @@ def show_admin_panel_github():
         with col3:
             st.metric("Pending", max(0, pending))
         
-        # Show chart for multiple masjids
-        all_masjids = df["masjid"].dropna().unique()
-        if len(all_masjids) > 1:
+        # Show chart for selected masjid (or all if "All" selected)
+        if masjid == "All" and len(display_df) > 1:
             st.write("**Assessment Status by Masjid**")
             
             masjid_stats = []
-            for m in all_masjids:
+            for m in display_df:
                 masjid_df = df[df["masjid"] == m]
                 if reviews_df is not None and not reviews_df.empty:
                     reviewed_its = reviews_df[reviews_df["its"].isin(masjid_df["its"].astype(str))]["its"].unique()
@@ -215,12 +217,52 @@ def show_admin_panel_github():
                     "Pending": pending_m
                 })
             
-            if masjid_stats:
-                stats_df = pd.DataFrame(masjid_stats)
-                stats_df = stats_df.set_index("Masjid")
-                
-                # Use Streamlit bar chart
-                st.bar_chart(stats_df, color=('green','yellow'),horizontal=True)
+            stats_df = pd.DataFrame(masjid_stats)
+            stats_df = stats_df.set_index("Masjid")
+            
+            # Create interactive chart with hover info
+            st.bar_chart(stats_df, use_container_width=True)
+            
+            # Show detailed breakdown below chart
+            with st.expander("📊 Detailed Breakdown"):
+                for stat in masjid_stats:
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.write(f"**{stat['Masjid']}**")
+                    with col2:
+                        st.write(f"✅ Assessed: {stat['Assessed']}")
+                    with col3:
+                        st.write(f"⏳ Pending: {stat['Pending']}")
+        
+        elif masjid != "All":
+            # Show chart for selected masjid only
+            st.write(f"**Assessment Status - {masjid}**")
+            
+            masjid_df = df[df["masjid"] == masjid]
+            if reviews_df is not None and not reviews_df.empty:
+                reviewed_its = reviews_df[reviews_df["its"].isin(masjid_df["its"].astype(str))]["its"].unique()
+                assessed_m = len(reviewed_its)
+            else:
+                assessed_m = 0
+            pending_m = len(masjid_df) - assessed_m
+            
+            # Create single-row dataframe for chart
+            stats_df = pd.DataFrame([{
+                "Masjid": masjid,
+                "Assessed": assessed_m,
+                "Pending": pending_m
+            }])
+            stats_df = stats_df.set_index("Masjid")
+            st.bar_chart(stats_df, use_container_width=True)
+            
+            # Show summary below chart
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total", len(masjid_df))
+            with col2:
+                st.metric("Assessed", assessed_m)
+            with col3:
+                st.metric("Pending", pending_m)
         
         st.divider()
         

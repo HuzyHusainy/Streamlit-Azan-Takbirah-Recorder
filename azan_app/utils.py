@@ -7,6 +7,13 @@ import re
 from datetime import datetime
 from config import *
 
+# ============= CACHING OPTIMIZATIONS =============
+# Cache validation rules to avoid re-computing on every run
+@st.cache_data
+def get_validation_rules():
+    """Get cached validation rules"""
+    return VALIDATION_RULES
+
 # ============= VALIDATION FUNCTIONS =============
 
 def validate_field(field_name, value, rules):

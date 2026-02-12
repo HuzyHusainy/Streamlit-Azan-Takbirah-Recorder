@@ -107,56 +107,64 @@ def show_form():
     azan_audio = None
     takbirah_audio = None
 
-    # Always reserve space for both, render only if checked
-    if interest_azan or interest_takbirah:
-        # Create columns for layout consistency
-        if interest_azan:
-            st.markdown("**🎙️ Azan Recording**")
+    # Use st.container to lock widget positions
+    with st.container():
+        if interest_azan or interest_takbirah:
+            if interest_azan:
+                st.markdown("**🎙️ Azan Recording**")
+                st.caption("💡 **Tip:** Tap the button → Allow microphone → Speak clearly → Auto-stops after silence")
+                
+                # Check if we have existing audio
+                existing_audio = get_audio("azan")
+                button_text = "🔄 Record Again" if existing_audio else "🎙️ Tap to Record"
+                
+                recorded_audio = audio_recorder(
+                    button_text,
+                    key="azan_recorder",
+                    pause_threshold=AUDIO_PAUSE_THRESHOLD,
+                    sample_rate=AUDIO_SAMPLE_RATE
+                )
+                
+                # Save audio if recorded
+                if recorded_audio is not None:
+                    set_audio("azan", recorded_audio)
+                
+                # Display saved audio
+                azan_audio = get_audio("azan")
+                if azan_audio:
+                    st.audio(azan_audio, format="audio/wav")
+                    show_inline_success("azan_audio", "Azan recorded successfully")
+                else:
+                    # Show error if checkbox selected but no audio
+                    st.caption("⏳ No recording yet")
             
-            # Check if we have existing audio
-            existing_audio = get_audio("azan")
-            button_text = "🔄 Record Again" if existing_audio else "🎙️ Tap to Record"
-            
-            recorded_audio = audio_recorder(
-                button_text,
-                key="azan_recorder",
-                pause_threshold=AUDIO_PAUSE_THRESHOLD,
-                sample_rate=AUDIO_SAMPLE_RATE
-            )
-            
-            # Save audio if recorded
-            if recorded_audio is not None:
-                set_audio("azan", recorded_audio)
-            
-            # Display saved audio
-            azan_audio = get_audio("azan")
-            if azan_audio:
-                st.audio(azan_audio, format="audio/wav")
-                show_inline_success("azan_audio", "Azan recorded successfully")
-        
-        if interest_takbirah:
-            st.markdown("**🎙️ Takbirah Recording**")
-            
-            # Check if we have existing audio
-            existing_audio = get_audio("takbirah")
-            button_text = "🔄 Record Again" if existing_audio else "🎙️ Tap to Record"
-            
-            recorded_audio = audio_recorder(
-                button_text,
-                key="takbirah_recorder",
-                pause_threshold=AUDIO_PAUSE_THRESHOLD,
-                sample_rate=AUDIO_SAMPLE_RATE
-            )
-            
-            # Save audio if recorded
-            if recorded_audio is not None:
-                set_audio("takbirah", recorded_audio)
-            
-            # Display saved audio
-            takbirah_audio = get_audio("takbirah")
-            if takbirah_audio:
-                st.audio(takbirah_audio, format="audio/wav")
-                show_inline_success("takbirah_audio", "Takbirah recorded successfully")
+            if interest_takbirah:
+                st.markdown("**🎙️ Takbirah Recording**")
+                st.caption("💡 **Tip:** Tap the button → Allow microphone → Speak clearly → Auto-stops after silence")
+                
+                # Check if we have existing audio
+                existing_audio = get_audio("takbirah")
+                button_text = "🔄 Record Again" if existing_audio else "🎙️ Tap to Record"
+                
+                recorded_audio = audio_recorder(
+                    button_text,
+                    key="takbirah_recorder",
+                    pause_threshold=AUDIO_PAUSE_THRESHOLD,
+                    sample_rate=AUDIO_SAMPLE_RATE
+                )
+                
+                # Save audio if recorded
+                if recorded_audio is not None:
+                    set_audio("takbirah", recorded_audio)
+                
+                # Display saved audio
+                takbirah_audio = get_audio("takbirah")
+                if takbirah_audio:
+                    st.audio(takbirah_audio, format="audio/wav")
+                    show_inline_success("takbirah_audio", "Takbirah recorded successfully")
+                else:
+                    # Show status if checkbox selected but no audio
+                    st.caption("⏳ No recording yet")
     
     # Get audio for validation (even if not currently displayed)
     if not interest_azan:
@@ -206,12 +214,19 @@ def show_form():
         errors['interests'] = "Select at least one recording interest"
 
     if interest_azan and not azan_audio:
-        errors['azan_audio'] = "Azan recording is required"
+        errors['azan_audio'] = "🎙️ Azan recording is required - please record it above"
 
     if interest_takbirah and not takbirah_audio:
-        errors['takbirah_audio'] = "Takbirah recording is required"
+        errors['takbirah_audio'] = "🎙️ Takbirah recording is required - please record it above"
 
     st.session_state.validation_errors = errors
+
+    # SHOW AUDIO VALIDATION ERRORS INLINE (before Review button)
+    if errors.get('azan_audio'):
+        show_inline_error("azan_audio", errors['azan_audio'])
+    
+    if errors.get('takbirah_audio'):
+        show_inline_error("takbirah_audio", errors['takbirah_audio'])
 
     # REVIEW BUTTON
     col_review, col_space = st.columns([1, 1])
@@ -284,7 +299,7 @@ def show_review_screen(form_data):
             if not st.session_state.submit_clicked:
                 st.session_state.submit_clicked = True
                 
-                with st.spinner("Uploading to cloud..."):
+                with st.spinner("Uploading to cloud... Please wait"):
                     interest_azan, interest_takbirah = form_data['interests']
                     
                     # Upload audio files to GitHub

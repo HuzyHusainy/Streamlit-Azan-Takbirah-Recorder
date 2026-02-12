@@ -11,7 +11,17 @@ from github_admin import show_admin_panel_github
 from user_form import show_form, show_review_screen, show_thank_you_screen
 
 # ============= PAGE CONFIG =============
-st.set_page_config(page_title="Shehrullah Aurangabad", layout="centered")
+st.set_page_config(
+    page_title="Shehrullah Aurangabad", 
+    layout="centered", 
+    page_icon="🕌",
+    initial_sidebar_state="expanded"
+)
+
+# ============= PERFORMANCE: Enable wide mode for better mobile =============
+st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+""", unsafe_allow_html=True)
 
 # ============= STYLING =============
 st.markdown(CSS_STYLES, unsafe_allow_html=True)
@@ -19,15 +29,19 @@ st.markdown(CSS_STYLES, unsafe_allow_html=True)
 # ============= SESSION STATE =============
 init_session_state()
 
-# ============= BACKGROUND IMAGE =============
-@st.cache_data
+# ============= BACKGROUND IMAGE - OPTIMIZED CACHING =============
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def get_background():
+    """Load background image with caching"""
     import base64
     import os
     if not os.path.exists("assets/ramadan-bg.jpg"):
         return None
-    with open("assets/ramadan-bg.jpg", "rb") as img:
-        return base64.b64encode(img.read()).decode()
+    try:
+        with open("assets/ramadan-bg.jpg", "rb") as img:
+            return base64.b64encode(img.read()).decode()
+    except Exception:
+        return None
 
 bg = get_background()
 if bg:

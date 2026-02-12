@@ -2,8 +2,8 @@
 import streamlit as st
 
 # Admin
-# ADMIN_PASSWORD = "azan"
-ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+ADMIN_PASSWORD = "azan"
+# ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 # Files & Directories
 DATA_FILE = "submissions.csv"
@@ -11,7 +11,7 @@ UPLOAD_DIR = "uploads"
 REVIEW_FILE = "admin_reviews.csv"
 
 # Audio Settings
-AUDIO_PAUSE_THRESHOLD = 5.0  # seconds
+AUDIO_PAUSE_THRESHOLD = 6.0  # seconds
 AUDIO_SAMPLE_RATE = 16000
 
 # Validation Rules
@@ -37,9 +37,10 @@ VALIDATION_RULES = {
 # Masjid List
 MASJID_LIST = ["", "Najmi Masjid", "Saifee Masjid", "Kalimi Masjid", "Vajihi Masjid"]
 
-# CSS Styles
+# CSS Styles - Mobile Optimized & Dark Mode Compatible
 CSS_STYLES = """
 <style>
+/* ========== BASE STYLES ========== */
 .block-container {
     background-color: rgba(255, 255, 255, 0.92);
     padding: 2rem;
@@ -47,58 +48,54 @@ CSS_STYLES = """
     max-width: 900px;
 }
 
-/* Input labels */
+/* ========== TEXT & LABELS (Desktop) ========== */
 label {
     font-size: 1.05rem !important;
     font-weight: 600 !important;
+    color: #333 !important;
+    display: block !important;
 }
 
-/* Section headers */
-.stMarkdown h1 {
-    font-size: 2.1rem;
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    color: #1a1a1a;
 }
 
-.stMarkdown h2 {
-    font-size: 1.6rem;
-}
-
-.stMarkdown h3 {
-    font-size: 1.25rem;
-}
-
-/* Checkbox / radio text */
-.stCheckbox label, .stRadio label {
-    font-size: 1rem !important;
-}
-
-/* Help text under inputs */
 .stCaption {
     font-size: 0.9rem;
     color: #555;
 }
 
-/* Inline validation styles */
+/* ========== DARK MODE ========== */
+[data-theme="dark"] label {
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .stMarkdown h1,
+[data-theme="dark"] .stMarkdown h2,
+[data-theme="dark"] .stMarkdown h3 {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .stCaption {
+    color: #b0b0b0;
+}
+
+/* ========== VALIDATION STYLES ========== */
 .validation-error {
     color: #d32f2f;
-    font-size: 0.85rem;
+    font-weight: 500;
     margin-top: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    font-size: 0.85rem;
 }
 
 .validation-success {
-    color: #388e3c;
-    font-size: 0.85rem;
+    color: #2e7d32;
+    font-weight: 500;
     margin-top: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    font-size: 0.85rem;
 }
 
-/* Recording timer styling - REMOVED (not needed) */
-
-/* Admin review status badge */
+/* ========== REVIEW BADGE STYLES ========== */
 .review-badge {
     display: inline-block;
     padding: 0.5rem 1rem;
@@ -123,27 +120,101 @@ label {
     color: #b71c1c;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-    .block-container {
-        max-width: 100% !important;
+/* ========== LOADING SPINNER ========== */
+.stSpinner {
+    color: #4CAF50 !important;
+}
+
+/* ========== MOBILE RESPONSIVE (max-width: 640px) ========== */
+@media (max-width: 640px) {
+    /* Much larger labels on mobile */
+    label {
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        line-height: 1.6 !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Larger section headers */
+    .stMarkdown h1 {
+        font-size: 1.8rem !important;
+        margin-top: 1.5rem !important;
+    }
+    
+    .stMarkdown h2 {
+        font-size: 1.4rem !important;
+        margin-top: 1.2rem !important;
+    }
+    
+    .stMarkdown h3 {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Larger buttons on mobile */
+    .stButton button {
+        font-size: 1.1rem !important;
+        padding: 0.8rem !important;
+        min-height: 50px !important;
+        width: 100% !important;
+    }
+    
+    /* Larger input fields */
+    .stSelectbox input, .stTextInput input, .stTextArea textarea {
+        font-size: 1.1rem !important;
+    }
+    
+    /* Larger checkboxes */
+    .stCheckbox label {
+        font-size: 1.15rem !important;
+        padding: 0.5rem !important;
+    }
+    
+    /* Better spacing */
+    .stForm {
         padding: 1rem !important;
     }
-    label {
-        font-size: 0.95rem !important;
+    
+    /* Reduce padding to save space */
+    .block-container {
+        padding: 1rem !important;
     }
-    .stMarkdown h1 {
-        font-size: 1.5rem;
-    }
-    .stMarkdown h2 {
-        font-size: 1.2rem;
-    }
-    /* Ensure buttons are touch-friendly (44px minimum) */
-    .stButton > button {
+    
+    /* Audio player larger on mobile */
+    audio {
         width: 100% !important;
-        min-height: 44px !important;
-        font-size: 1rem !important;
+        min-height: 50px !important;
     }
 }
+
+/* ========== DESKTOP (min-width: 641px) ========== */
+@media (min-width: 641px) {
+    .stMarkdown h1 {
+        font-size: 2.1rem;
+    }
+    
+    .stMarkdown h2 {
+        font-size: 1.6rem;
+    }
+    
+    .stMarkdown h3 {
+        font-size: 1.25rem;
+    }
+}
+
+/* ========== BATTERY SAVER / REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========== PERFORMANCE OPTIMIZATION ========== */
+/* Reduce repaints with will-change */
+.stButton, .stSelectbox, input, textarea {
+    will-change: auto;
+}
+
 </style>
 """
