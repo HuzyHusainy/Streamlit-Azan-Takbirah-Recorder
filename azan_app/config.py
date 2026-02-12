@@ -2,8 +2,8 @@
 import streamlit as st
 
 # Admin
-ADMIN_PASSWORD = "azan"
-# ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+# ADMIN_PASSWORD = "azan"
+ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 # Files & Directories
 DATA_FILE = "submissions.csv"
