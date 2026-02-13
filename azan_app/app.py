@@ -14,7 +14,7 @@ from user_form import show_form, show_review_screen, show_thank_you_screen
 st.set_page_config(
     page_title="Shehrullah Aurangabad", 
     layout="centered", 
-    page_icon="🕌",
+    page_icon="🕋",
     initial_sidebar_state="expanded"
 )
 
